@@ -1,0 +1,6 @@
+node_modules/
+data/raw/*
+!data/raw/.gitkeep
+data/*.db
+app/ml/models/*
+!app/ml/models/.gitkeep
