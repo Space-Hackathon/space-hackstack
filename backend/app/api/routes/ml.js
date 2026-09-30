@@ -1,6 +1,6 @@
 import { Router } from "express";
 
-import { HttpError } from "../../core/errors.js";
+import { HttpError, validationError } from "../../core/errors.js";
 import { modelInfo } from "../../ml/inference.js";
 import { predict } from "../../ml/pipeline.js";
 
@@ -13,7 +13,7 @@ router.get("/model", (_req, res) => {
 router.post("/predict", (req, res) => {
   const payload = req.body;
   if (payload === null || typeof payload !== "object" || Array.isArray(payload)) {
-    throw new HttpError(422, "Request body must be a JSON object");
+    throw validationError("dict_type", ["body"], "Input should be a valid dictionary", payload ?? null);
   }
   try {
     res.json(predict(payload));

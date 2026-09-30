@@ -4,7 +4,7 @@ import fs from "node:fs";
 import multer from "multer";
 
 import { settings } from "../core/config.js";
-import { HttpError } from "../core/errors.js";
+import { HttpError, validationError } from "../core/errors.js";
 
 export function safeFilename(filename) {
   // Strip any client-supplied directories (either separator) to prevent path traversal.
@@ -30,11 +30,14 @@ const upload = multer({
 export function saveUpload(req, res, next) {
   upload.single("file")(req, res, (err) => {
     if (!err) {
-      if (!req.file) return next(new HttpError(422, "Field 'file' is required"));
+      if (!req.file) return next(validationError("missing", ["body", "file"], "Field required", null));
       return next();
     }
     if (err.code === "LIMIT_FILE_SIZE") {
       return next(new HttpError(413, `File exceeds ${settings.maxUploadMb} MB limit`));
+    }
+    if (err.code === "LIMIT_UNEXPECTED_FILE") {
+      return next(validationError("missing", ["body", "file"], "Field required", null));
     }
     if (err instanceof multer.MulterError) return next(new HttpError(422, err.message));
     return next(err);

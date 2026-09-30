@@ -108,6 +108,29 @@ test("unknown processor", async () => {
   assert.equal(r.status, 400);
 });
 
+test("text counts normalise CRLF like the FastAPI backend", async () => {
+  const r = await request(app)
+    .post("/api/files")
+    .attach("file", Buffer.from("héllo wörld\r\nline two\n\nfour"), { filename: "n.txt", contentType: "text/plain" });
+  assert.equal(r.body.result.char_count, 26);
+  assert.equal(r.body.result.line_count, 4);
+});
+
+test("validation errors use FastAPI's format", async () => {
+  let r = await request(app).get("/api/files?limit=500");
+  assert.equal(r.status, 422);
+  assert.deepEqual(r.body.detail[0].loc, ["query", "limit"]);
+  assert.equal(r.body.detail[0].type, "less_than_equal");
+
+  r = await request(app).get("/api/files/abc");
+  assert.equal(r.status, 422);
+  assert.deepEqual(r.body.detail[0].loc, ["path", "file_id"]);
+
+  r = await request(app).post("/api/files").attach("other", Buffer.from("x"), "x.txt");
+  assert.equal(r.status, 422);
+  assert.deepEqual(r.body.detail[0], { type: "missing", loc: ["body", "file"], msg: "Field required", input: null });
+});
+
 test("ml predict", async () => {
   assert.equal((await request(app).get("/api/ml/model")).body.model, "dummy-mean");
   const r = await request(app).post("/api/ml/predict").send({ features: [1, 2, 3] });

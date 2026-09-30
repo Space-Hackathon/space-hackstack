@@ -10,8 +10,9 @@ export default register({
   extensions: [".txt", ".log", ".md"],
 
   async process(filePath) {
-    const text = (await fs.readFile(filePath)).toString("utf8");
-    const lines = text === "" ? [] : text.replace(/(\r\n|\r|\n)$/, "").split(/\r\n|\r|\n/);
+    // Normalise newlines like Python's text mode so counts match the FastAPI backend.
+    const text = (await fs.readFile(filePath)).toString("utf8").replace(/\r\n?/g, "\n");
+    const lines = text === "" ? [] : text.replace(/\n$/, "").split("\n");
     const words = text.split(/\s+/).filter(Boolean);
     return {
       line_count: lines.length,
