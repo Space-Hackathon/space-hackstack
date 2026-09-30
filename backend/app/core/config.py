@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     upload_dir: Path = Path("./data/raw")
     max_upload_mb: int = 200
     model_path: Path = Path("./app/ml/models/model.pt")
+    processor_modules: list[str] = []
+    ml_pipeline_module: str | None = None
 
 
 @lru_cache

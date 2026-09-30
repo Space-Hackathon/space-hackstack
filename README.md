@@ -186,3 +186,13 @@ This repository is designed for:
 
 Domain-specific functionality should be implemented as independent
 processing modules rather than modifying the core architecture.
+
+## Reusable component kit
+
+The frontend lives in frontend/ on both component branches and uses the same API contract.
+Run npm ci and npm run dev there; configure its .env with VITE_API_URL=http://localhost:8000/api.
+See frontend/README.md for independent upload, file list/detail, processor selector, result renderer,
+health, and model playground components. No frontend edits are needed to switch backends.
+
+Backend plugins are opt-in through backend/.env. See backend/PLUGINS.md for runnable examples.
+GET /api/capabilities describes registered processors, enabled features, and upload limits.

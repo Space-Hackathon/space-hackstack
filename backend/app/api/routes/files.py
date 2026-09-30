@@ -52,8 +52,8 @@ async def upload_file(
 
 @router.get("", response_model=list[DataFileRead])
 def list_files(
-    offset: int = 0,
-    limit: int = Query(50, le=200),
+    offset: int = Query(0, ge=0),
+    limit: int = Query(50, ge=1, le=200),
     session: Session = Depends(get_session),
 ) -> list[DataFile]:
     stmt = select(DataFile).order_by(col(DataFile.created_at).desc()).offset(offset).limit(limit)
