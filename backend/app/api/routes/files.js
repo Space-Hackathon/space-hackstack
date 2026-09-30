@@ -23,12 +23,15 @@ function boolParam(value, loc, fallback) {
   throw validationError("bool_parsing", loc, "Input should be a valid boolean, unable to interpret input", value);
 }
 
-function intParam(value, loc, { fallback, max } = {}) {
+function intParam(value, loc, { fallback, min, max } = {}) {
   if (value === undefined) return fallback;
   if (!/^\s*[+-]?\d+\s*$/.test(String(value))) {
     throw validationError("int_parsing", loc, "Input should be a valid integer, unable to parse string as an integer", value);
   }
   const n = Number(value);
+  if (min !== undefined && n < min) {
+    throw validationError("greater_than_equal", loc, "Input should be greater than or equal to " + min, value, { ge: min });
+  }
   if (max !== undefined && n > max) {
     throw validationError("less_than_equal", loc, `Input should be less than or equal to ${max}`, value, { le: max });
   }
@@ -65,8 +68,8 @@ router.post("/", checkUploadQuery, saveUpload, async (req, res) => {
 });
 
 router.get("/", (req, res) => {
-  const offset = intParam(req.query.offset, ["query", "offset"], { fallback: 0 });
-  const limit = intParam(req.query.limit, ["query", "limit"], { fallback: 50, max: 200 });
+  const offset = intParam(req.query.offset, ["query", "offset"], { fallback: 0, min: 0 });
+  const limit = intParam(req.query.limit, ["query", "limit"], { fallback: 50, min: 1, max: 200 });
   res.json(DataFile.list({ offset, limit }));
 });
 

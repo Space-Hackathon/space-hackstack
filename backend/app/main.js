@@ -2,6 +2,7 @@ import cors from "cors";
 import express from "express";
 import swaggerUi from "swagger-ui-express";
 
+import "./extensions.js";
 import { apiRouter } from "./api/router.js";
 import { buildOpenApi } from "./api/openapi.js";
 import { settings } from "./core/config.js";

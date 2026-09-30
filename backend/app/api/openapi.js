@@ -13,6 +13,16 @@ export function buildOpenApi() {
     openapi: "3.1.0",
     info: { title: settings.appName, version: "0.1.0" },
     paths: {
+      [p + "/capabilities"]: {
+        get: {
+          tags: ["capabilities"], summary: "Frontend configuration and available features",
+          responses: { 200: { description: "OK", ...json({ type: "object", properties: {
+            contract_version: { type: "string" }, max_upload_bytes: { type: "integer" },
+            processors: { type: "array", items: ref("Processor") },
+            features: { type: "object", additionalProperties: { type: "boolean" } },
+          } }) } },
+        },
+      },
       [`${p}/health`]: {
         get: {
           tags: ["health"],
@@ -33,7 +43,7 @@ export function buildOpenApi() {
           summary: "List uploads",
           parameters: [
             { name: "offset", in: "query", schema: { type: "integer", default: 0, minimum: 0 } },
-            { name: "limit", in: "query", schema: { type: "integer", default: 50, maximum: 200 } },
+            { name: "limit", in: "query", schema: { type: "integer", default: 50, minimum: 1, maximum: 200 } },
           ],
           responses: { 200: { description: "OK", ...json({ type: "array", items: ref("DataFileRead") }) } },
         },
