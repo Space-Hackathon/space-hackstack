@@ -86,15 +86,13 @@ npm run dev
 
 ### FastAPI Backend
 
+Requires [uv](https://docs.astral.sh/uv/). See `backend-fastapi/README.md` for endpoints and details.
+
 cd backend-fastapi
 
-python -m venv venv
+uv sync
 
-source venv/bin/activate
-
-pip install -r requirements.txt
-
-uvicorn app.main:app --reload
+uv run fastapi dev app/main.py
 
 ### Node Backend
 
@@ -109,17 +107,14 @@ npm run dev
 
 Create a new processor inside:
 
-processors/
+backend-fastapi/app/processors/
 
 Example:
 
 satellite_processor.py
 
-Implement:
-
-process(file)
-
-Register the processor with the file processing service.
+Subclass `BaseProcessor`, implement `process(path)`, decorate it with
+`@register`, and import it in `app/processors/__init__.py`.
 
 ---
 
@@ -127,19 +122,19 @@ Register the processor with the file processing service.
 
 Place model files inside:
 
-ml/models/
+backend-fastapi/app/ml/models/
 
 Add preprocessing logic to:
 
-ml/preprocessing.py
+app/ml/preprocessing.py
 
 Add inference logic to:
 
-ml/inference.py
+app/ml/inference.py
 
 Add output transformation to:
 
-ml/postprocessing.py
+app/ml/postprocessing.py
 
 The API can then expose model results without requiring changes
 to the frontend.
@@ -172,7 +167,7 @@ Example:
 API_PORT=8000
 DATABASE_URL=sqlite:///./data/app.db
 UPLOAD_DIR=./data/raw
-MODEL_PATH=./ml/models/model.pt
+MODEL_PATH=./app/ml/models/model.pt
 
 ---
 
