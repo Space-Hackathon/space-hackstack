@@ -1,5 +1,5 @@
 [project]
-name = "backend-fastapi"
+name = "space-hackstack-backend"
 version = "0.1.0"
 description = "FastAPI backend for the Space Hackstack monorepo"
 readme = "README.md"

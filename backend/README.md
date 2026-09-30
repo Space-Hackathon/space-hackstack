@@ -1,18 +1,22 @@
-# backend-fastapi
+# backend (FastAPI)
 
-FastAPI backend for the Space Hackstack monorepo. Upload satellite and
+FastAPI implementation of the Space Hackstack backend. Upload satellite and
 related data files, run pluggable processors over them, store results in
 SQLite, and expose an ML inference endpoint.
+
+This directory is swappable: another branch provides a Node implementation
+at the same `backend/` path. Both follow the [backend contract](#backend-contract)
+below, so the frontend works with either one unchanged.
 
 ## Run
 
 Dependencies are managed with [uv](https://docs.astral.sh/uv/).
 
 ```bash
-cd backend-fastapi
+cd backend
 uv sync                 # creates .venv and installs deps + dev group from uv.lock
 cp .env.example .env
-uv run fastapi dev app/main.py
+uv run python -m app    # serves on API_PORT (default 8000), auto-reload in development
 ```
 
 - API docs: http://localhost:8000/docs
@@ -41,6 +45,41 @@ data/
   samples/             Example inputs (ISS TLE, ground-pass CSV)
 tests/
 ```
+
+## Backend contract
+
+Any implementation placed in `backend/` must provide the following, so it can be
+dropped in without touching the frontend:
+
+- **Start:** a single command from `backend/` that serves on `API_PORT` (default `8000`).
+- **Config:** reads `backend/.env` using the variables in `.env.example`
+  (`API_PORT`, `API_PREFIX`, `CORS_ORIGINS`, `DATABASE_URL`, `UPLOAD_DIR`,
+  `MAX_UPLOAD_MB`, `MODEL_PATH`).
+- **Routes:** everything under `API_PREFIX` (default `/api`), with the endpoints,
+  status codes and JSON shapes below.
+- **Data:** uploads in `data/raw/`, sample inputs in `data/samples/`, SQLite at
+  `data/app.db`.
+
+A file record (`GET /api/files/{id}`) looks like:
+
+```json
+{
+  "id": 1,
+  "filename": "iss.tle",
+  "content_type": "application/octet-stream",
+  "size_bytes": 152,
+  "processor": "tle",
+  "status": "processed",
+  "created_at": "2026-09-30T17:22:26.591870Z",
+  "processed_at": "2026-09-30T17:22:26.599112Z",
+  "result": { "count": 1, "satellites": [ ... ], "errors": [] },
+  "error": null
+}
+```
+
+`status` is one of `uploaded`, `processed` or `failed` (with `error` set). List
+responses (`GET /api/files`) omit `result` and `error`. The full schema is
+served at `/openapi.json`.
 
 ## Endpoints
 

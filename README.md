@@ -13,13 +13,16 @@ can be added or replaced without changing the core application.
 - React
 - Vite
 
-### Primary Backend
-- Python
-- FastAPI
+### Backend (plug and play)
+The backend lives in `backend/` and has one implementation per branch:
 
-### Alternative Backend
-- Node.js
-- Express
+- `fast-api` branch: Python + FastAPI (uv)
+- Node branch: Node.js + Express
+
+Both implement the same backend contract (port, env vars, `/api` routes,
+response shapes, data layout), documented in `backend/README.md`. The
+frontend talks only to that contract, so switching branches swaps the
+backend without frontend changes.
 
 ### Database
 - SQLite
@@ -59,8 +62,7 @@ Backend
 ## Features
 
 - React frontend
-- FastAPI backend
-- Alternative Node.js backend
+- Swappable backend (FastAPI or Node.js) behind one API contract
 - REST API structure
 - File uploads
 - CSV processing
@@ -84,20 +86,20 @@ cd frontend
 npm install
 npm run dev
 
-### FastAPI Backend
+### Backend
 
-Requires [uv](https://docs.astral.sh/uv/). See `backend-fastapi/README.md` for endpoints and details.
+The API serves on http://localhost:8000/api whichever implementation is
+checked out. See `backend/README.md` for the contract and endpoints.
 
-cd backend-fastapi
+FastAPI (`fast-api` branch, requires [uv](https://docs.astral.sh/uv/)):
 
+cd backend
 uv sync
+uv run python -m app
 
-uv run fastapi dev app/main.py
+Node (Node branch):
 
-### Node Backend
-
-cd backend-node
-
+cd backend
 npm install
 npm run dev
 
@@ -107,7 +109,7 @@ npm run dev
 
 Create a new processor inside:
 
-backend-fastapi/app/processors/
+backend/app/processors/
 
 Example:
 
@@ -122,7 +124,7 @@ Subclass `BaseProcessor`, implement `process(path)`, decorate it with
 
 Place model files inside:
 
-backend-fastapi/app/ml/models/
+backend/app/ml/models/
 
 Add preprocessing logic to:
 
