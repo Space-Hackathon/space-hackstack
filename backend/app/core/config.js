@@ -29,6 +29,14 @@ function sqlitePath(url) {
   return match[1];
 }
 
+function parseModules(raw) {
+  const value = JSON.parse(raw);
+  if (!Array.isArray(value) || !value.every((entry) => typeof entry === "string" && entry.length)) {
+    throw new TypeError("PROCESSOR_MODULES must be a JSON array of module paths");
+  }
+  return value;
+}
+
 function loadSettings() {
   const databaseUrl = env("DATABASE_URL", "sqlite:///./data/app.db");
   return {
@@ -42,6 +50,8 @@ function loadSettings() {
     uploadDir: path.normalize(env("UPLOAD_DIR", "./data/raw")),
     maxUploadMb: Number(env("MAX_UPLOAD_MB", "200")),
     modelPath: path.normalize(env("MODEL_PATH", "./app/ml/models/model.pt")),
+    processorModules: parseModules(env("PROCESSOR_MODULES", "[]")),
+    mlPipelineModule: env("ML_PIPELINE_MODULE", null),
   };
 }
 
