@@ -13,13 +13,16 @@ can be added or replaced without changing the core application.
 - React
 - Vite
 
-### Primary Backend
-- Python
-- FastAPI
+### Backend (plug and play)
+The backend lives in `backend/` and has one implementation per branch:
 
-### Alternative Backend
-- Node.js
-- Express
+- `fast-api` branch: Python + FastAPI (uv)
+- Node branch: Node.js + Express
+
+Both implement the same backend contract (port, env vars, `/api` routes,
+response shapes, data layout), documented in `backend/README.md`. The
+frontend talks only to that contract, so switching branches swaps the
+backend without frontend changes.
 
 ### Database
 - SQLite
@@ -59,8 +62,7 @@ Backend
 ## Features
 
 - React frontend
-- FastAPI backend
-- Alternative Node.js backend
+- Swappable backend (FastAPI or Node.js) behind one API contract
 - REST API structure
 - File uploads
 - CSV processing
@@ -84,22 +86,20 @@ cd frontend
 npm install
 npm run dev
 
-### FastAPI Backend
+### Backend
 
-cd backend-fastapi
+The API serves on http://localhost:8000/api whichever implementation is
+checked out. See `backend/README.md` for the contract and endpoints.
 
-python -m venv venv
+FastAPI (`fast-api` branch, requires [uv](https://docs.astral.sh/uv/)):
 
-source venv/bin/activate
+cd backend
+uv sync
+uv run python -m app
 
-pip install -r requirements.txt
+Node (Node branch):
 
-uvicorn app.main:app --reload
-
-### Node Backend
-
-cd backend-node
-
+cd backend
 npm install
 npm run dev
 
@@ -109,17 +109,14 @@ npm run dev
 
 Create a new processor inside:
 
-processors/
+backend/app/processors/
 
 Example:
 
 satellite_processor.py
 
-Implement:
-
-process(file)
-
-Register the processor with the file processing service.
+Subclass `BaseProcessor`, implement `process(path)`, decorate it with
+`@register`, and import it in `app/processors/__init__.py`.
 
 ---
 
@@ -127,19 +124,19 @@ Register the processor with the file processing service.
 
 Place model files inside:
 
-ml/models/
+backend/app/ml/models/
 
 Add preprocessing logic to:
 
-ml/preprocessing.py
+app/ml/preprocessing.py
 
 Add inference logic to:
 
-ml/inference.py
+app/ml/inference.py
 
 Add output transformation to:
 
-ml/postprocessing.py
+app/ml/postprocessing.py
 
 The API can then expose model results without requiring changes
 to the frontend.
@@ -172,7 +169,7 @@ Example:
 API_PORT=8000
 DATABASE_URL=sqlite:///./data/app.db
 UPLOAD_DIR=./data/raw
-MODEL_PATH=./ml/models/model.pt
+MODEL_PATH=./app/ml/models/model.pt
 
 ---
 
