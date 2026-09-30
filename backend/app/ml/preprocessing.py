@@ -1,3 +1,4 @@
+import math
 from typing import Any
 
 
@@ -8,6 +9,6 @@ def preprocess(payload: dict[str, Any]) -> list[float]:
     feature extraction (e.g. loading and normalising an image tile).
     """
     features = payload.get("features")
-    if not isinstance(features, list) or not all(isinstance(x, (int, float)) for x in features):
+    if not isinstance(features, list) or not all(type(x) in (int, float) and math.isfinite(x) for x in features):
         raise ValueError("payload must contain 'features': a list of numbers")
     return [float(x) for x in features]
