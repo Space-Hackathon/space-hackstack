@@ -186,6 +186,7 @@ This repository is designed for:
 - Research projects
 - Dashboard applications
 - Proof-of-concept applications
+- Bomboclaat
 
 Domain-specific functionality should be implemented as independent
 processing modules rather than modifying the core architecture.
